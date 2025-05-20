@@ -1,0 +1,53 @@
+.carCardContent{
+    border: 1px solid rgb(122, 122, 122);
+    border-radius: 15px;
+    padding: 10px;
+    max-width: 350px;
+
+    display: flex;
+    flex-direction: column;
+
+}
+
+.carCardTitle{
+    display: flex;
+    align-items: center;
+}
+
+.carCardImg{
+    width: 350px;
+    height: 300px;
+    border-radius: 10px;
+    align-self: center;
+}
+
+.carCardName{
+    font-size: 24px;
+    padding: 5px;
+}
+
+.carCardDesc{
+    font-size: 16px;
+    padding: 5px;
+}
+
+.carCardType{
+    font-size: 20px;
+padding: 5px;
+}
+
+.carCardPrice{
+    padding: 5px;
+    font-size: 26px;
+}
+
+.carCardPriceBlock{
+    display: flex;
+    align-items: center;
+}
+
+.carCardContent:hover{
+    cursor: pointer;
+    background-color: rgba(210, 210, 210, 0.600);
+    transition: 0.3s ease;
+}

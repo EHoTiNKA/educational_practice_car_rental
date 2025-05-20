@@ -1,0 +1,50 @@
+.mainPageContainer{
+    margin: auto;
+    max-width: 1800px;
+    margin-top: 150px;
+}
+
+.mainPageContent{
+    display: flex;
+}
+
+.filterNavBarCarType{
+    display: flex;
+    flex-direction: column;
+
+    align-items: start;
+
+    padding: 10px 20px;
+
+    border: 1px solid rgb(122, 122, 122);
+    border-radius: 10px;
+    min-width: 15%;
+    margin-right: 100px;
+}
+
+.filterNavBarCarTypeH2{
+    font-size: 26px;
+    align-self: center;
+    margin-bottom: 15px;
+}
+
+.filterNavBarCarType p{
+    font-size: 18px;
+}
+
+.mainPageCarList{
+    width: 70%;
+}
+
+.mainPageCarListH1{
+    font-size: 36px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgb(122, 122, 122);
+    margin-bottom: 50px;
+}
+
+.carCardsGrid{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: 40px;
+}
