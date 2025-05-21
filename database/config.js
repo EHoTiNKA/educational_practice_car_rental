@@ -1,5 +1,3 @@
-// настройки подключения к базе
-
 import { Sequelize } from "sequelize";
 
 const sequelize = new Sequelize({

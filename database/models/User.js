@@ -1,31 +1,24 @@
-import { DataTypes } from "sequelize";
 import sequelize from "../config.js";
+import { DataTypes } from "sequelize";
 
-const Car = sequelize.define("Car", {
+const User = sequelize.define("User", {
     name: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    desc: {
-        type: DataTypes.TEXT,
-        allowNull: false,
-    },
-    type: {
+    password: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    price: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
-    required_drive_license: {
+    email: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    img: {
+    driver_license_type: {
         type: DataTypes.STRING,
         allowNull: false,
     },
 });
 
-export default Car;
+
+export default User;
