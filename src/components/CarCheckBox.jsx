@@ -1,11 +1,15 @@
 import "./styles/CarCheckBox.css";
 
-const CarCheckBox = ({ text }) => {
+const CarCheckBox = ({ text, checked, onChange }) => {
   return (
     <div className="CarCheckBoxContent">
-      <label class="custom-checkbox">
-        <input name="dummy" type="checkbox" />
-        <span class="checkmark"></span>
+      <label className="custom-checkbox">
+        <input 
+          type="checkbox" 
+          checked={checked}
+          onChange={onChange}
+        />
+        <span className="checkmark"></span>
         <p className="carCheckBoxText">{text}</p>
       </label>
     </div>

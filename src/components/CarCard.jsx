@@ -9,7 +9,7 @@ const CarCard = ({ name, desc, img, type, price, onClick }) => {
       <p className="carCardDesc">{desc}</p>
       <div className="carCardPriceBlock">
         <p className="carCardPrice">{price}</p>
-        <p>руб.</p>
+        <p>руб./сутки</p>
       </div>
     </div>
   );

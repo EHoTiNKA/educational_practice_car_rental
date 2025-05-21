@@ -15,15 +15,12 @@ const CarModal = ({ car, onClose }) => {
         </button>
         <img src={car.img} alt={car.name} className="modalCarImg" />
         <h2>{car.name}</h2>
-        <p>
-          <strong>Тип:</strong> {car.type}
-        </p>
-        <p>
-          <strong>Цена:</strong> {car.price} руб.
-        </p>
-        <p>
-          <strong>Описание:</strong> {car.desc}
-        </p>
+        <div className="modalSpecs">
+          <p><strong>Тип:</strong> {car.type}</p>
+          <p><strong>Цена:</strong> {car.price} руб./сутки</p>
+          <p><strong>Требуемая категория прав:</strong> {car.required_drive_license}</p>
+          <p><strong>Описание:</strong> {car.desc}</p>
+        </div>
       </div>
     </div>
   );

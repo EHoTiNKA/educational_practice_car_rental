@@ -9,7 +9,7 @@ router.get("/", async (req, res) => {
         const orders = await Order.findAll();
         res.json(orders);
     } catch (error) {
-        res.status(500).json({ error: "Ошибка при получении пользователей" });
+        res.status(500).json({ error: "Ошибка при получении заказов" });
     }
 });
 
@@ -17,10 +17,10 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
     try {
         const order = await Order.findByPk(req.params.id);
-        if (!order) return res.status(404).json({ error: "Пользователь не найден" });
+        if (!order) return res.status(404).json({ error: "Заказ не найден" });
         res.json(order);
     } catch (error) {
-        res.status(500).json({ error: "Ошибка при поиске пользователя" });
+        res.status(500).json({ error: "Ошибка при поиске заказа" });
     }
 });
 
