@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import CarCard from "../components/CarCard";
 import CarCheckBox from "../components/CarCheckBox";
 import CarModal from "../components/CarModal";
+import AuthModal from "../components/AuthModal";
+import { FaUserCircle } from "react-icons/fa";
 import "./styles/MainPage.css";
 
 const MainPage = () => {
@@ -10,6 +12,8 @@ const MainPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedTypes, setSelectedTypes] = useState(new Set());
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const fetchCars = async () => {
@@ -50,18 +54,71 @@ const MainPage = () => {
     });
   };
 
-  const filteredCars = carList.filter(car => 
+  const filteredCars = carList.filter(car =>
     selectedTypes.size === 0 || selectedTypes.has(car.type)
   );
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  const handleLogin = async (credentials) => {
+    try {
+      const response = await fetch("http://localhost:3000/api/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials)
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem("user", JSON.stringify(data));
+        setUser(data);
+        setShowAuthModal(false);
+      } else {
+        alert(data.error || "Ошибка входа");
+      }
+    } catch (error) {
+      alert("Ошибка соединения");
+    }
+  };
+
+  const handleRegister = async (credentials) => {
+    try {
+      const response = await fetch("http://localhost:3000/api/users/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials)
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert("Регистрация успешна! Теперь войдите");
+        setShowAuthModal(false);
+      } else {
+        alert(data.error || "Ошибка регистрации");
+      }
+    } catch (error) {
+      alert("Ошибка соединения");
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+  };
 
   return (
     <div className="mainPageContainer">
       <div className="mainPageContent">
         <div className="mainPageFiltersNavBar">
-          <div className="filterNavBarCarType">
-            <h2 className="filterNavBarCarTypeH2">Выберите тип авто</h2>
+          <div className="mainPageFilterCarType">
+            <h2 className="mainPageFilterTitle">Выберите тип авто</h2>
             {['Пикап', 'Седан', 'Купе', 'Универсал', 'Хетчбек', 'Внедорожник', 'Минивэн', 'Лимузин'].map(type => (
-              <CarCheckBox 
+              <CarCheckBox
                 key={type}
                 text={type}
                 checked={selectedTypes.has(type)}
@@ -72,14 +129,36 @@ const MainPage = () => {
         </div>
 
         <div className="mainPageCarList">
-          <h1 className="mainPageCarListH1">Список доступных автомобилей</h1>
+          <div className="mainPageHeader">
+            <h1 className="mainPageTitle">Список доступных автомобилей</h1>
+            <div className="mainPageProfileControls">
+              {user ? (
+                <div className="mainPageProfileInfo">
+                  <span className="mainPageUserName">{user.name}</span>
+                  <button 
+                    className="mainPageLogoutButton"
+                    onClick={handleLogout}
+                  >
+                    Выйти
+                  </button>
+                </div>
+              ) : (
+                <div 
+                  className="mainPageProfileIcon" 
+                  onClick={() => setShowAuthModal(true)}
+                >
+                  <FaUserCircle size={32} />
+                </div>
+              )}
+            </div>
+          </div>
 
-          {loading && <p>Загрузка автомобилей...</p>}
-          {error && <p style={{ color: "red" }}>Ошибка: {error}</p>}
+          {loading && <p className="mainPageLoading">Загрузка автомобилей...</p>}
+          {error && <p className="mainPageError">Ошибка: {error}</p>}
 
-          <div className="carCardsGrid">
+          <div className="mainPageCarGrid">
             {filteredCars.map((car) => (
-              <CarCard 
+              <CarCard
                 key={car.id}
                 name={car.name}
                 desc={car.desc}
@@ -94,9 +173,17 @@ const MainPage = () => {
       </div>
 
       {selectedCar && (
-        <CarModal 
-          car={selectedCar} 
-          onClose={handleCloseModal} 
+        <CarModal
+          car={selectedCar}
+          onClose={handleCloseModal}
+        />
+      )}
+
+      {showAuthModal && (
+        <AuthModal
+          onClose={() => setShowAuthModal(false)}
+          onLogin={handleLogin}
+          onRegister={handleRegister}
         />
       )}
     </div>

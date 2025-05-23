@@ -16,7 +16,8 @@ const User = sequelize.define("User", {
     },
     driver_license_type: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
+        defaultValue: "B",
     },
 });
 
