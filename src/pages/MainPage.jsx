@@ -3,7 +3,8 @@ import CarCard from "../components/CarCard";
 import CarCheckBox from "../components/CarCheckBox";
 import CarModal from "../components/CarModal";
 import AuthModal from "../components/AuthModal";
-import { FaUserCircle } from "react-icons/fa";
+import CartModal from "../components/CartModal";
+import { FaUserCircle, FaShoppingCart } from "react-icons/fa";
 import "./styles/MainPage.css";
 
 const MainPage = () => {
@@ -14,14 +15,14 @@ const MainPage = () => {
   const [selectedTypes, setSelectedTypes] = useState(new Set());
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [user, setUser] = useState(null);
+  const [cart, setCart] = useState([]);
+  const [showCartModal, setShowCartModal] = useState(false);
 
   useEffect(() => {
     const fetchCars = async () => {
       try {
         const response = await fetch("http://localhost:3000/api/cars");
-        if (!response.ok) {
-          throw new Error("Ошибка при загрузке машин");
-        }
+        if (!response.ok) throw new Error("Ошибка при загрузке машин");
         const data = await response.json();
         setCarList(data);
         setLoading(false);
@@ -30,40 +31,82 @@ const MainPage = () => {
         setLoading(false);
       }
     };
-
     fetchCars();
   }, []);
 
-  const handleCardClick = (carData) => {
-    setSelectedCar(carData);
-  };
+  useEffect(() => {
+    const savedUser = localStorage.getItem("user");
+    const savedCart = localStorage.getItem("cart");
+    if (savedUser) setUser(JSON.parse(savedUser));
+    if (savedCart) setCart(JSON.parse(savedCart));
+  }, []);
 
-  const handleCloseModal = () => {
-    setSelectedCar(null);
-  };
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("cart", JSON.stringify(cart));
+    }
+  }, [cart, user]);
 
   const handleTypeToggle = (type) => {
     setSelectedTypes(prev => {
       const newTypes = new Set(prev);
-      if (newTypes.has(type)) {
-        newTypes.delete(type);
-      } else {
-        newTypes.add(type);
-      }
+      newTypes.has(type) ? newTypes.delete(type) : newTypes.add(type);
       return newTypes;
     });
+  };
+
+  const addToCart = (car) => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+    setCart(prev => {
+      const existing = prev.find(item => item.id === car.id);
+      return existing
+        ? prev.map(item =>
+          item.id === car.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+        : [...prev, { ...car, quantity: 1 }];
+    });
+  };
+
+  const removeFromCart = (carId) => {
+    setCart(prev => prev.filter(item => item.id !== carId));
+  };
+
+  const updateQuantity = (carId, newQuantity) => {
+    if (newQuantity < 1) return;
+    setCart(prev =>
+      prev.map(item =>
+        item.id === carId ? { ...item, quantity: newQuantity } : item
+      )
+    );
+  };
+
+  const handlePrintContract = () => {
+    const printContent = `
+      <h1>Договор аренды</h1>
+      <p>Клиент: ${user?.name}</p>
+      <p>Дата: ${new Date().toLocaleDateString()}</p>
+      <h3>Автомобили:</h3>
+      <ul>
+        ${cart.map(car => `
+          <li>${car.name} - ${car.quantity} суток - ${car.price * car.quantity} руб.</li>
+        `).join('')}
+      </ul>
+      <h3>Итого: ${cart.reduce((sum, car) => sum + car.price * car.quantity, 0)} руб.</h3>
+    `;
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.print();
   };
 
   const filteredCars = carList.filter(car =>
     selectedTypes.size === 0 || selectedTypes.has(car.type)
   );
-
-  useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-  }, []);
 
   const handleLogin = async (credentials) => {
     try {
@@ -72,15 +115,12 @@ const MainPage = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credentials)
       });
-
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem("user", JSON.stringify(data));
         setUser(data);
         setShowAuthModal(false);
-      } else {
-        alert(data.error || "Ошибка входа");
-      }
+      } else alert(data.error || "Ошибка входа");
     } catch (error) {
       alert("Ошибка соединения");
     }
@@ -109,6 +149,7 @@ const MainPage = () => {
   const handleLogout = () => {
     localStorage.removeItem("user");
     setUser(null);
+    setCart([]);
   };
 
   return (
@@ -134,26 +175,24 @@ const MainPage = () => {
             <div className="mainPageProfileControls">
               {user ? (
                 <div className="mainPageProfileInfo">
+                  <div className="cartIconContainer" onClick={() => setShowCartModal(true)}>
+                    <FaShoppingCart size={24} />
+                    {cart.length > 0 && <span className="cartBadge">{cart.length}</span>}
+                  </div>
                   <span className="mainPageUserName">{user.name}</span>
-                  <button 
-                    className="mainPageLogoutButton"
-                    onClick={handleLogout}
-                  >
+                  <button className="mainPageLogoutButton" onClick={handleLogout}>
                     Выйти
                   </button>
                 </div>
               ) : (
-                <div 
-                  className="mainPageProfileIcon" 
-                  onClick={() => setShowAuthModal(true)}
-                >
+                <div className="mainPageProfileIcon" onClick={() => setShowAuthModal(true)}>
                   <FaUserCircle size={32} />
                 </div>
               )}
             </div>
           </div>
 
-          {loading && <p className="mainPageLoading">Загрузка автомобилей...</p>}
+          {loading && <p className="mainPageLoading">Загрузка...</p>}
           {error && <p className="mainPageError">Ошибка: {error}</p>}
 
           <div className="mainPageCarGrid">
@@ -165,7 +204,7 @@ const MainPage = () => {
                 img={car.img}
                 type={car.type}
                 price={`${car.price}`}
-                onClick={() => handleCardClick(car)}
+                onClick={() => setSelectedCar(car)}
               />
             ))}
           </div>
@@ -175,7 +214,8 @@ const MainPage = () => {
       {selectedCar && (
         <CarModal
           car={selectedCar}
-          onClose={handleCloseModal}
+          onClose={() => setSelectedCar(null)}
+          onAddToCart={addToCart}
         />
       )}
 
@@ -184,6 +224,16 @@ const MainPage = () => {
           onClose={() => setShowAuthModal(false)}
           onLogin={handleLogin}
           onRegister={handleRegister}
+        />
+      )}
+
+      {showCartModal && (
+        <CartModal
+          cart={cart}
+          onClose={() => setShowCartModal(false)}
+          onRemove={removeFromCart}
+          onUpdateQuantity={updateQuantity}
+          onPrint={handlePrintContract}
         />
       )}
     </div>
